@@ -1,30 +1,72 @@
-# RDFZ2024
+# RDFZ 2024级风云
 
-网页游戏与原创原声《回声与晨光》。本分支包含网页资源优化，以及 **19首BGM、6段短音乐** 的谱面、静态音频和游戏接入。
+校园题材的现代 2D 抽卡策略 RPG。
 
-## 配乐制作
+当前版本包含完整系统主页、风云招募、十连保底、重复角色碎片、伙伴图鉴、自动编队、章节冒险，以及带原创 2D 角色立绘和场景的回合战斗。游戏支持场景背景音乐、战斗音效和部分关键操作音效。
 
-三个原创主题（校园与伙伴、AI侵蚀、抵抗与希望）→ 逐曲乐谱与MIDI → 本地FluidSynth采样渲染 → 分轨混音 → 循环与编码验证 → 按场景加载。
+使用 IndexedDB 保存伙伴、背包、关卡和剧情进度。角色、关卡、卡池和剧情的扩展方式见 [EXTENDING.md](RDFZ/EXTENDING.md)。
 
-先制作并修改主页、探索、战斗三首代表曲，再完成整套配乐。采用免费的Salamander钢琴与GeneralUser GS音源；不使用音乐API、额外云端模型或GPU。**未进行主观听觉验证**，技术测试不代表审美验收。
+## 启动
 
-## 文档
+电脑需要安装 Node.js 18+。启动脚本会构建网页资源并启动本地服务，无需安装 npm 依赖。
 
-- [制作规范与主题体系](RDFZ/music/music-bible.md)
-- [本地重建、工具依赖与原声预览](RDFZ/music/README.md)
-- [交付内容、测试结果及限制](RDFZ/music/reports/delivery-report.md)
-- [代表曲修改记录](RDFZ/music/reviews/representatives-v2.md) · [整套谱面复核](RDFZ/music/reviews/album-review.md)
-- [逐曲谱面、MIDI与MusicXML](RDFZ/music/scores/) · [真实场景映射](RDFZ/music/scene-mapping.json)
+### Windows
 
-Git包含压缩网页音频与可编辑乐谱；大型音源、分轨、母带及缓存保留在本地工作目录，可按文档重建，不进入网页部署。
+下载或解压项目后，双击 `RDFZ/start-windows.bat`。
 
-## 运行与构建
+### WSL / Linux
+
+在仓库根目录执行：
 
 ```bash
-python -m http.server 4173 --directory RDFZ
-node RDFZ/tools/build_web.mjs
-# 已初始化音源与依赖后，离线增量重建整套配乐：
-python RDFZ/tools/music/pipeline.py all --offline --resume
+bash RDFZ/start.sh
 ```
 
-Vercel项目根目录设为 `RDFZ`，使用其中的 `vercel.json`。本次接入网页版本，未重新打包EXE/APK或同步独立旧版 `RDFZ-Mobile/www`。
+启动后访问 `http://127.0.0.1:4173`。如果端口被占用，可指定其他端口：
+
+```bash
+PORT=4174 bash RDFZ/start.sh
+```
+
+## 操作
+
+- 点击角色：切换当前行动角色
+- 点击技能：消耗技能星并释放技能
+- 空格：普通攻击
+- 数字键 1、2、3：快速释放对应技能
+- Esc：暂停或继续战斗
+- 每轮敌方行动结束后，全队恢复 3 点技能星
+
+默认新存档拥有 3000 召唤石，单抽消耗 300，十连消耗 2700。声音可通过游戏内开关统一开启或关闭。
+
+## 存档
+
+游戏进度保存在当前浏览器的本地存储中，不会随游戏文件上传或分享。把整个游戏目录发给其他人，对方会在自己的浏览器中建立独立的新存档。
+
+更换浏览器、访问地址或端口时，存档不会自动同步。
+
+## 网页部署
+
+在 Vercel 导入仓库，将项目根目录设为 `RDFZ`，框架选为 Other。仓库中的 `vercel.json` 已配置构建命令 `node tools/build_web.mjs` 和输出目录 `dist`。
+
+默认部署使用正常招募模式。测试时可以设置以下构建环境变量，修改后需要重新构建或部署：
+
+| 环境变量 | 默认值 | 作用 |
+| --- | --- | --- |
+| `RDFZ_INITIAL_GEMS` | `3000` | 新存档初始召唤石 |
+| `RDFZ_UNLIMITED_GEMS` | `false` | 设为 `true` 时招募不扣费 |
+
+本地测试示例：
+
+```bash
+RDFZ_INITIAL_GEMS=30000 RDFZ_UNLIMITED_GEMS=true PORT=4174 bash RDFZ/start.sh
+```
+
+已有正常存档保留余额；旧无限存档切回正常模式时，召唤石会重置为配置的初始金额，角色和关卡进度保留。完整配置说明见 [游戏运行文档](RDFZ/README.md)。
+
+## 项目目录
+
+- `RDFZ/`：网页游戏、角色与场景资源、构建工具。
+- `RDFZ-Mobile/`：独立 Android 工程，网页更新不会自动同步到此目录。
+
+资源加载与维护说明见 [Web 性能文档](RDFZ/WEB_PERFORMANCE.md)，配乐和音效的制作资料见 [音频文档](RDFZ/music/README.md)。
