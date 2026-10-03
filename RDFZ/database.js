@@ -1,0 +1,13 @@
+(function(global){
+  const DB_NAME='rdfz-game-db',VERSION=1,STORES=['profile','stages','roster','inventory','storyFlags'];
+  let connection;
+  function open(){if(connection)return connection;connection=new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,VERSION);req.onupgradeneeded=()=>{for(const name of STORES)if(!req.result.objectStoreNames.contains(name))req.result.createObjectStore(name,{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});return connection}
+  async function put(store,value){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(value);tx.oncomplete=()=>resolve(value);tx.onerror=()=>reject(tx.error)})}
+  async function get(store,id){const db=await open();return new Promise((resolve,reject)=>{const req=db.transaction(store).objectStore(store).get(id);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+  async function all(store){const db=await open();return new Promise((resolve,reject)=>{const req=db.transaction(store).objectStore(store).getAll();req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+  async function resetAll(){const db=await open();return new Promise((resolve,reject)=>{const tx=db.transaction(STORES,'readwrite');for(const store of STORES)tx.objectStore(store).clear();tx.oncomplete=()=>resolve(true);tx.onerror=()=>reject(tx.error)})}
+  async function saveState(s){await Promise.all([put('profile',{id:'main',chapter:s.chapter,gems:s.gems,unlimitedGems:!!s.unlimitedGems,pity:s.pity,firstTen:s.firstTen,tutorialDone:s.tutorialDone,globalHpBonus:s.globalHpBonus||0,updatedAt:Date.now()}),put('roster',{id:'owned',heroes:s.owned,team:s.team||[]}),put('inventory',{id:'bag',items:s.inventory||{tickets:3,energy:96,fragments:{}}}),put('stages',{id:'progress',current:s.chapter,currentStageId:s.currentStageId,cleared:s.cleared||[]}),put('storyFlags',{id:'flags',seen:s.storySeen||[]})]);return true}
+  async function loadState(){const [profile,roster,inventory,stages,storyFlags]=await Promise.all([get('profile','main'),get('roster','owned'),get('inventory','bag'),get('stages','progress'),get('storyFlags','flags')]);if(!profile)return null;return {...profile,currentStageId:stages?.currentStageId,owned:roster?.heroes||['haq'],team:roster?.team||[],inventory:inventory?.items||{},cleared:stages?.cleared||[],storySeen:storyFlags?.seen||[]}}
+  async function exportSave(){const out={schema:VERSION,exportedAt:new Date().toISOString()};for(const s of STORES)out[s]=await all(s);return out}
+  global.RDFZDB={open,get,put,all,resetAll,saveState,loadState,exportSave,stores:STORES};
+})(window);

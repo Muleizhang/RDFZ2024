@@ -1,0 +1,8 @@
+{
+  "appId": "cn.rdfz.class2024.game",
+  "appName": "RDFZ 2024级风云",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

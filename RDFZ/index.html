@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#17060a" />
+  <meta name="description" content="RDFZ 2024级风云——2D 策略卡牌游戏" />
+  <title>RDFZ 2024级风云</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='13' fill='%237d0b1b'/%3E%3Cpath d='M13 15h38v9H36v25h-9V24H13z' fill='%23f8d98b'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="gacha.css" />
+  <link rel="stylesheet" href="layout.css" />
+  <link rel="stylesheet" href="art-fix.css" />
+  <link rel="stylesheet" href="codex.css" />
+  <link rel="stylesheet" href="codex-fix.css" />
+  <link rel="stylesheet" href="formation.css" />
+  <link rel="stylesheet" href="combat-enhancements.css" />
+  <link rel="stylesheet" href="campaign-map.css" />
+  <link rel="stylesheet" href="new-heroes.css" />
+</head>
+<body>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand"><span class="crest">R</span><div><strong>RDFZ 2024级风云</strong><small>校园战术演算</small></div></div>
+      <div class="stage-info"><span>章节 <b id="chapter">01</b></span><i></i><span id="stageName">入学试炼</span></div>
+      <div class="resources"><span class="resource"><em>✦</em><b id="teamStars">25</b> 技能星</span><button id="pauseBtn" class="icon-btn" aria-label="暂停战斗">Ⅱ</button><button id="soundBtn" class="icon-btn" aria-label="开关声音">♪</button><button id="helpBtn" class="icon-btn" aria-label="查看规则">?</button></div>
+    </header>
+
+    <main class="game-shell">
+      <section class="battlefield" aria-label="对战区域">
+        <div class="arena-grid"></div><div class="scanline"></div>
+        <div class="enemy-side"><div class="side-label"><span>ENEMY</span><b id="enemyCount">5 / 5</b></div><div id="enemyTeam" class="formation enemy-formation"></div></div>
+        <div class="center-mark"><span>第 <b id="round">1</b> 回合</span><strong>VS</strong><small id="turnLabel">我方行动</small></div>
+        <div class="player-side"><div class="side-label"><span>RDFZ</span><b id="playerCount">5 / 5</b></div><div id="playerTeam" class="formation player-formation"></div></div>
+      </section>
+
+      <aside class="command-panel">
+        <div class="selected-card" id="selectedCard"></div>
+        <div class="skills-title"><span>行动指令</span><small>每回合选择一名角色行动</small></div>
+        <div id="skills" class="skills"></div>
+        <button id="basicAttack" class="basic-attack"><span>普通攻击</span><small>不消耗技能星</small></button>
+      </aside>
+    </main>
+
+    <footer class="combat-log"><div class="log-title"><span class="pulse"></span>战况记录</div><div id="log" class="log-lines" aria-live="polite"></div><button id="speedBtn">速度 ×1</button></footer>
+  </div>
+
+  <div id="startScreen" class="overlay start-screen">
+    <div class="start-emblem"><span>R</span></div><p class="eyebrow">RENMIN UNIVERSITY AFFILIATED HIGH SCHOOL</p>
+    <h1>2024级<span>风云</span></h1><p class="start-copy">集结伙伴，夺回被失控 AI 占领的校园。</p>
+    <button id="startBtn" class="primary-btn">进入风云世界</button><button id="continueBtn" class="text-btn">继续游戏</button>
+    <div class="start-hint">招募伙伴 · 养成编队 · 怒气必杀 · 2D 战斗演出</div>
+  </div>
+
+  <div id="homeScreen" class="hub-screen hidden">
+    <header class="hub-top"><div class="brand"><span class="crest">R</span><div><strong>RDFZ 风云纪元</strong><small>CLASS OF 2024</small></div></div><div class="profile"><span class="level">LV. <b id="accountLevel">18</b></span><span>体力 <b>96/120</b></span><span class="gem">◆ <b id="gems">2880</b></span><button id="hubSound">♪</button></div></header>
+    <div class="hub-hero"><div class="hub-copy"><p class="eyebrow">CHAPTER 01 · 风云再起</p><h2>新的学期，<br><span>新的传说。</span></h2><p>召集曾经并肩的同伴，组建属于你的五人阵线。</p><button id="quickBattle" class="primary-btn">继续主线</button></div><div class="hub-lineup" aria-label="当前出战队伍"></div><div class="chapter-card"><small>当前关卡</small><b>1-1 入学试炼</b><span>推荐战力 12,800</span></div></div>
+    <nav class="hub-nav"><button data-hub="home" class="active"><i>⌂</i><span>主页</span></button><button id="rosterBtn"><i>♟</i><span>伙伴</span></button><button id="summonBtn" class="summon-main"><i>✦</i><span>招募</span></button><button id="battleBtn"><i>⚔</i><span>冒险</span></button><button id="bagBtn"><i>▦</i><span>背包</span></button></nav>
+    <div class="event-strip"><article id="storyBtn" role="button" tabindex="0"><span>剧情档案</span><b>风云录</b><small>查看已经解锁的主线故事</small></article></div>
+  </div>
+
+  <div id="summonScreen" class="overlay summon-screen hidden"><button class="back-btn" data-hide="summonScreen">‹ 返回主页</button><div class="summon-visual"><div class="summon-rings"><i></i><i></i><i></i><strong>R</strong></div><p class="eyebrow">2024 CLASS RECRUITMENT</p><h2>风云招募</h2><p>每 10 次招募必得 A 级及以上伙伴，重复伙伴转化为 20 枚对应碎片</p></div><div class="summon-pool"><div class="pity"><span>距离必得 S 级</span><b id="pityCount">30</b><small>次</small></div><div class="summon-actions"><button id="singlePull"><small>招募 1 次</small><b>◆ 300</b></button><button id="tenPull" class="primary-btn"><small>招募 10 次</small><b>◆ 2700</b></button></div><button id="ratesBtn" class="text-btn">查看招募概率</button></div><div id="summonResult" class="summon-result hidden"><p class="eyebrow">NEW PARTNERS</p><h3>伙伴集结</h3><div id="pullCards"></div><button id="pullAgain" class="primary-btn">再次招募</button><button id="closePull" class="text-btn">返回招募</button></div></div>
+
+  <div id="rosterScreen" class="overlay roster-screen hidden"><button class="back-btn" data-hide="rosterScreen">‹ 返回主页</button><div class="roster-head"><p class="eyebrow">PARTNER ARCHIVE</p><h2>伙伴图鉴</h2><p>已拥有 <b id="ownedCount">0 / 9</b></p></div><div id="rosterGrid" class="roster-grid"></div><div class="team-dock"><span>当前出战</span><div id="teamDock"></div><button id="autoTeam">一键编队</button></div></div>
+  <div id="heroDetail" class="overlay hero-detail hidden"><button class="close-btn" data-close="heroDetail">×</button><div id="heroDetailArt" class="hero-detail-art"></div><div class="hero-detail-content"><p class="eyebrow" id="detailRank"></p><h2 id="detailName"></h2><p id="detailLore"></p><div id="detailStats" class="detail-stats"></div><h3>原作技能</h3><div id="detailSkills" class="detail-skills"></div></div></div>
+  <div id="formationScreen" class="overlay formation-screen hidden"><button class="back-btn" data-hide="formationScreen">‹ 返回主页</button><header class="formation-head"><div><p class="eyebrow">BATTLE FORMATION</p><h2>排兵布阵</h2><p>从已解锁伙伴中选择五人。选择顺序即为 1–5 号位。</p></div><div class="power-box"><small>队伍战力</small><b id="formationPower">0</b></div></header><section class="formation-board"><div id="formationSlots" class="formation-slots"></div><div class="formation-controls"><span id="formationCount">已选择 0 / 5</span><button id="recommendTeam">一键推荐</button><button id="confirmFormation" class="primary-btn" disabled>确认阵容 · 进入战斗</button></div></section><section><h3 class="collection-title">已解锁伙伴</h3><div id="formationRoster" class="formation-roster"></div></section></div>
+  <div id="campaignMapScreen" class="overlay campaign-screen hidden"><button class="back-btn" data-hide="campaignMapScreen">‹ 返回主页</button><header class="campaign-head"><div><p class="eyebrow">RDFZ CAMPUS CAMPAIGN</p><h2>校园风云地图</h2><p>选择已解锁区域，沿校园路线逐章推进。</p></div><div class="campaign-progress"><small>主线进度</small><b id="campaignProgress">0 / 0</b></div></header><div id="campaignMap" class="campaign-map"></div></div>
+  <div id="chapterMapScreen" class="overlay chapter-screen hidden"><button id="backToCampaign" class="back-btn">‹ 返回大地图</button><header class="chapter-head"><div><p id="chapterNumber" class="eyebrow"></p><h2 id="chapterMapTitle"></h2><p id="chapterMapCopy"></p></div><div class="chapter-progress"><small>章节进度</small><b id="chapterProgress">0 / 0</b></div></header><div id="stagePath" class="stage-path"></div></div>
+
+  <div id="bagScreen" class="overlay system-screen hidden"><button class="back-btn" data-hide="bagScreen">‹ 返回主页</button><div class="system-head"><p class="eyebrow">INVENTORY</p><h2>背包</h2><p>战斗与活动中获得的资源会存入这里。</p></div><div class="bag-tabs"><button class="active">全部</button><button>养成材料</button><button>伙伴碎片</button><button>消耗品</button></div><div id="bagGrid" class="bag-grid"></div></div>
+
+  <div id="storyScreen" class="overlay system-screen story-screen hidden"><button class="back-btn" data-hide="storyScreen">‹ 返回主页</button><div class="system-head"><p class="eyebrow">MEMORIES OF 2024</p><h2>风云录</h2><p>推进主线后解锁新的班级故事与人物记录。</p></div><div id="storyList" class="story-list"></div><div id="storyReader" class="story-reader hidden"><button id="closeStory">×</button><small id="storyChapter"></small><h3 id="storyTitle"></h3><p id="storyLine"></p><button id="nextStory" class="primary-btn">继续</button></div></div>
+
+  <div id="ratesScreen" class="overlay hidden"><div class="modal rates-modal"><button class="close-btn" data-close="ratesScreen">×</button><p class="eyebrow">RECRUITMENT DETAILS</p><h2>招募概率</h2><div class="rate-table"><div><b>S</b><span>6%</span><small>每 30 次必得</small></div><div><b>A</b><span>30%</span><small>十连至少获得 1 名</small></div><div><b>B</b><span>64%</span><small>重复伙伴转化为碎片</small></div></div><h3>剧情伙伴</h3><p>剧情伙伴在对应关卡加入队伍前不会进入招募池；成功获得后会永久加入常规招募池，可重复抽取并转化为碎片。</p><h3>重复伙伴</h3><p>重复获得的伙伴会转化为 20 枚对应碎片；每累计 100 枚会自动强化一次，使基础全属性永久提高 10%。</p></div></div>
+
+  <div id="tutorialScreen" class="overlay tutorial-screen hidden"><div class="tutorial-figure"><div class="guide-portrait"></div></div><div class="tutorial-dialog"><p class="eyebrow">新手教程 <span id="tutorialProgress">1 / 6</span></p><h2 id="tutorialTitle">欢迎回来</h2><p id="tutorialText"></p><div class="tutorial-diagram" id="tutorialDiagram"></div><div><button id="skipTutorial" class="text-btn">跳过教程</button><button id="nextTutorial" class="primary-btn">下一步</button></div></div></div>
+  <div id="stageNarrative" class="overlay stage-narrative hidden"><div class="narrative-backdrop"></div><div id="narrativePoster" class="narrative-poster hidden" role="img" aria-label="剧情演出海报"></div><div class="narrative-dialog"><p class="eyebrow" id="narrativeEyebrow">FINAL STAIRWAY</p><h2 id="narrativeSpeaker">地下通讯记录</h2><p id="narrativeText"></p><div class="narrative-progress" id="narrativeProgress"></div><button id="nextNarrative" class="primary-btn">继续</button></div></div>
+
+  <div id="draftScreen" class="overlay hidden"><div class="modal draft-modal"><p class="eyebrow">ASSEMBLE YOUR TEAM</p><h2>组建五人小队</h2><p>从每个位置选择一名同学。S 级角色拥有可选择的技能流派。</p><div id="draftSlots" class="draft-slots"></div><div id="draftCards" class="draft-cards"></div><button id="enterBattle" class="primary-btn" disabled>进入战场</button></div></div>
+  <div id="resultScreen" class="overlay hidden"><div class="modal result-modal"><p class="eyebrow" id="resultEyebrow">BATTLE COMPLETE</p><h2 id="resultTitle">演算胜利</h2><p id="resultText"></p><div id="resultStats" class="result-stats"></div><button id="nextBtn" class="primary-btn">下一场演算</button><button id="retryBtn" class="text-btn">重新挑战</button></div></div>
+  <div id="soulHuntScreen" class="overlay soul-hunt-screen hidden"><div class="soul-hunt-shade"></div><header class="soul-hunt-head"><p class="eyebrow">PHASE II · 失散魂魄</p><h2>收集天台游魂</h2><p>点击不断游动的魂魄，在鬼王现身前完成收容。</p><b id="soulCount">0 / 12</b></header><div id="soulField" class="soul-field" aria-label="游魂收集区域"></div></div>
+  <div id="basketballGame" class="overlay basketball-game hidden"><div class="court-lines"></div><button id="leaveBasketball" class="back-btn">‹ 返回章节地图</button><header><p class="eyebrow" id="basketballEyebrow">BASKETBALL CHALLENGE</p><h2 id="basketballTitle">三分线</h2><p id="basketballCopy"></p><b id="basketballScore">0 / 5</b></header><main><div id="shotGame" class="shot-game"><div class="hoop">◯<i></i></div><div class="shot-meter"><span class="perfect-zone"></span><i id="shotNeedle"></i></div><button id="shootBall" class="primary-btn">投篮</button></div><div id="reactionGame" class="reaction-game hidden"><div id="reactionPrompt" class="reaction-prompt">↑</div><div class="reaction-buttons"><button data-dir="↑">↑</button><button data-dir="←">←</button><button data-dir="↓">↓</button><button data-dir="→">→</button></div></div><p id="basketballFeedback">把握时机完成挑战。</p></main></div>
+  <div id="libraryPuzzle" class="overlay library-puzzle hidden"><button id="leaveLibraryPuzzle" class="back-btn">‹ 返回章节地图</button><div class="rust-room"><header><p class="eyebrow">ARCHIVE ANOMALY</p><h2 id="libraryPuzzleTitle">图书整理</h2><p id="libraryPuzzleCopy"></p></header><div id="libraryPuzzleScene" class="puzzle-scene"></div><div class="puzzle-note" id="libraryPuzzleNote"></div></div></div>
+  <div id="parkourGame" class="overlay parkour-game hidden"><button id="leaveParkour" class="back-btn">‹ 返回章节地图</button><header><p class="eyebrow">PHYSICAL TRAINING ESCAPE</p><h2>体育统练</h2><p>使用 ← → 切换跑道，避开迎面障碍。</p><b id="parkourTimer">01:45</b></header><div id="runTrack" class="run-track"><div class="lane"></div><div class="lane"></div><div class="lane"></div><div id="runner" class="runner">◆</div><div id="toiletExit" class="toilet-exit" aria-hidden="true"></div></div><p id="parkourStatus">体统开始，速度会不断提升。</p></div>
+  <div id="helpScreen" class="overlay hidden"><div class="modal help-modal"><button class="close-btn" data-close="helpScreen">×</button><p class="eyebrow">FIELD MANUAL</p><h2>作战手册</h2><div class="rules"><article><b>01</b><h3>选择角色</h3><p>点击我方角色查看技能。每回合一名角色行动一次。</p></article><article><b>02</b><h3>积攒技能星</h3><p>每回合全队恢复技能星。高阶技能需要更多技能星。</p></article><article><b>03</b><h3>突破阵线</h3><p>默认优先攻击前排。击破敌方全员即可获胜。</p></article><article><b>04</b><h3>属性克制</h3><p>金、木、水、火、土伤害会受到不同抗性影响。</p></article></div></div></div>
+  <div id="pauseScreen" class="overlay pause-screen hidden"><div class="modal pause-modal"><p class="eyebrow">BATTLE PAUSED</p><h2>战斗暂停</h2><p>当前回合已经冻结。你可以继续战斗，或保存关卡进度后返回主页。</p><div class="pause-actions"><button id="resumeBattle" class="primary-btn">继续战斗</button><button id="returnHome" class="text-btn">保存并返回主页</button></div></div></div>
+  <div id="battleStatsScreen" class="overlay battle-stats-screen hidden"><div class="battle-stats-modal"><button id="closeBattleStats" class="close-btn" aria-label="关闭属性面板">×</button><p class="eyebrow">CURRENT BATTLE STATUS</p><div id="battleStatsContent"></div><small class="battle-stats-hint">长按任意人物卡片可再次查看</small></div></div>
+  <link rel="stylesheet" href="flight-effects.css">
+  <link rel="stylesheet" href="basketball.css">
+  <link rel="stylesheet" href="garden-battles.css">
+  <link rel="stylesheet" href="library-canteen.css">
+  <link rel="stylesheet" href="playground.css">
+  <link rel="stylesheet" href="bandit.css">
+  <script src="core.js"></script>
+  <script src="database.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

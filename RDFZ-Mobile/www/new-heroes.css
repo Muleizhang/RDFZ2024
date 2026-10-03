@@ -1,0 +1,10 @@
+.bella-controls{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.bella-controls small{width:100%;color:var(--gold);font-size:9px;letter-spacing:.08em}
+.bella-controls button{border:1px solid var(--line);background:#171116;padding:4px 7px;font-size:10px;cursor:pointer}
+.bella-controls button.active{border-color:var(--gold);background:#392b16;color:#ffe29a}
+.reserve-choice-overlay{position:fixed;inset:0;z-index:160;display:grid;place-items:center;padding:24px;background:rgba(4,3,5,.94);backdrop-filter:blur(12px)}
+.reserve-choice-modal{width:min(920px,94vw);max-height:90vh;overflow:auto;border:1px solid rgba(242,199,97,.35);background:linear-gradient(145deg,#21151a,#090709);padding:28px;box-shadow:0 30px 100px #000}
+.reserve-choice-modal h2{margin:5px 0 8px}.reserve-choice-modal>p:not(.eyebrow){color:var(--muted);font-size:13px}
+.reserve-choice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin-top:20px}
+.reserve-choice-grid button{border:1px solid var(--line);background:#171116;padding:10px;cursor:pointer;text-align:left}.reserve-choice-grid button:hover{border-color:var(--gold);transform:translateY(-2px)}
+.reserve-choice-grid span{display:block;height:150px;background-image:var(--art);background-size:contain;background-position:center bottom;background-repeat:no-repeat}.reserve-choice-grid b,.reserve-choice-grid small{display:block}.reserve-choice-grid small{margin-top:3px;color:var(--muted)}

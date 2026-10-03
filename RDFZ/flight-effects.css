@@ -1,0 +1,24 @@
+.flying-unit {
+  filter: drop-shadow(0 0 12px #64ffe8) drop-shadow(0 0 28px #38bdf8) !important;
+  animation: flightHover .85s ease-in-out infinite alternate;
+}
+.flying-unit .avatar::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  z-index: -1;
+  left: 12%; right: 12%; bottom: -18px;
+  height: 72px;
+  background: radial-gradient(ellipse, #7bfff5 0, #2dd4bf88 38%, transparent 72%);
+  clip-path: polygon(18% 0, 42% 100%, 52% 18%, 68% 100%, 84% 0);
+  animation: thrusterFlare .35s ease-in-out infinite alternate;
+}
+.flight-badge {
+  position: absolute; z-index: 20; right: -18px; top: -22px;
+  padding: 5px 9px; border: 1px solid #bafff8;
+  background: #073c43; color: #d8fffb;
+  font: 800 10px "Microsoft YaHei"; letter-spacing: .12em;
+  box-shadow: 0 0 18px #49f9e7; white-space: nowrap;
+}
+@keyframes flightHover { to { translate: 0 -8px; } }
+@keyframes thrusterFlare { to { filter: brightness(1.8); transform: scaleY(1.18); } }

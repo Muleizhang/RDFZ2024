@@ -1,0 +1,25 @@
+.hostage-badge {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  top: -16px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 4px 8px;
+  border: 1px solid #ff435f;
+  background: #300811;
+  color: #ffd7dc;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  box-shadow: 0 0 18px #e8183e99;
+  animation: hostage-pulse 1.1s ease-in-out infinite alternate;
+}
+
+.unit:has(.hostage-badge) .avatar {
+  box-shadow: 0 0 0 2px #ff435f, 0 0 30px #e8183e88;
+}
+
+@keyframes hostage-pulse {
+  to { filter: brightness(1.45); transform: translateX(-50%) scale(1.06); }
+}

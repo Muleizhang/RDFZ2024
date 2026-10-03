@@ -1,0 +1,26 @@
+# Dependencies and package-manager caches
+node_modules/
+.pnpm-store/
+
+# Generated Android build artifacts and local configuration
+**/.gradle/
+**/build/
+*.apk
+*.aab
+*.aar
+local.properties
+
+# Capacitor-generated copies (source of truth: RDFZ-Mobile/www)
+RDFZ-Mobile/android/app/src/main/assets/public/
+RDFZ-Mobile/android/app/src/main/assets/capacitor.config.json
+RDFZ-Mobile/android/app/src/main/assets/capacitor.plugins.json
+RDFZ-Mobile/android/app/src/main/res/xml/config.xml
+RDFZ-Mobile/android/capacitor-cordova-android-plugins/
+
+# Editor and operating-system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
