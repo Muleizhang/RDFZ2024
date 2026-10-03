@@ -27,3 +27,14 @@ Thumbs.db
 
 # Static web deployment output
 RDFZ/dist/
+
+# Local music production artifacts; ship only static compressed audio and scores
+**/__pycache__/
+*.pyc
+music-work/
+RDFZ/music-work/
+RDFZ/music/soundfonts/
+RDFZ/music/stems/
+RDFZ/music/masters/
+RDFZ/music/cache/
+RDFZ/music/previews/
