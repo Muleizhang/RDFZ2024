@@ -24,3 +24,6 @@ RDFZ-Mobile/android/capacitor-cordova-android-plugins/
 Thumbs.db
 *.log
 *.tmp
+
+# Static web deployment output
+RDFZ/dist/
