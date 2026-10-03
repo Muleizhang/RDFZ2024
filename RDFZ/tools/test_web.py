@@ -42,6 +42,8 @@ with sync_playwright() as p:
     page.click('#skipTutorial')
     expect(page.locator('#homeScreen')).to_be_visible()
     page.click('#rosterBtn')
+    # IntersectionObserver runs after layout; an empty loading set is not readiness.
+    page.wait_for_function("[...document.querySelectorAll('#rosterGrid [data-art-src]')].some(e=>e.style.getPropertyValue('--art'))")
     settle()
     cards = page.locator('#rosterGrid [data-art-src]')
     total_cards = cards.count()

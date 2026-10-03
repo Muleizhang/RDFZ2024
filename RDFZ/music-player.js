@@ -28,6 +28,7 @@
   let ctx, master, bgmBus, fxBus, unlocked=false, muted=false, desired='', current=null;
   let generation=0, controller=null, fxController=null, fxGeneration=0, fx=null, queued=false;
   const bgmCache=new Map(), fxCache=new Map(), live=new Set();
+  const sfx=window.createRDFZSfx?.({context:()=>ctx,output:()=>master,enabled:()=>unlocked&&!muted});
   const stats={starts:0,requests:0,aborted:0,failures:[],decoded:[],stingers:[],maxLiveBgm:0};
   try {muted=localStorage.getItem('rdfz-music-muted')==='1';} catch {}
   function ramp(param,value,seconds=.35) {
@@ -40,8 +41,8 @@
     for (const id of ['soundBtn','hubSound','musicToggle']) {
       const b=document.getElementById(id);if (!b) continue;
       const text=id==='musicToggle'?(muted?'♫ 关':'♫ 开'):(muted?'×':'♪');if (b.textContent!==text) b.textContent=text;
-      b.setAttribute('aria-label',muted?'开启音乐':'关闭音乐');b.setAttribute('aria-pressed',String(!muted));
-      b.title=muted?'开启音乐':'关闭音乐';
+      b.setAttribute('aria-label',muted?'开启声音（音乐与音效）':'关闭声音（音乐与音效）');b.setAttribute('aria-pressed',String(!muted));
+      b.title=muted?'开启声音（音乐与音效）':'关闭声音（音乐与音效）';
     }
   }
   function createContext() {
@@ -55,7 +56,7 @@
   async function unlock(event) {
     if (event && !event.isTrusted) return;
     if(unlocked && ctx?.state==='running')return;
-    try {createContext();await ctx.resume();unlocked=ctx.state==='running';if(unlocked && !(event?.target?.closest?.('#startBtn,#continueBtn') && resolveScene()==='title')) sync(true);}
+    try {createContext();await ctx.resume();unlocked=ctx.state==='running';sfx?.warm();if(unlocked && !(event?.target?.closest?.('#startBtn,#continueBtn') && resolveScene()==='title')) sync(true);}
     catch (e) {stats.failures.push('unlock: '+e.message);}
   }
   async function load(id,signal,cache) {
@@ -106,7 +107,7 @@
   function sync(retry=false) {
     toggleButton.hidden=visible('homeScreen') || visible('app');
     const id=resolveScene(),changed=id!==desired;
-    if(changed){desired=id;generation++;controller?.abort();cancelFx();}
+    if(changed){if(!['battle','boss','final'].includes(id))sfx?.stop();desired=id;generation++;controller?.abort();cancelFx();}
     if(unlocked && !muted && (changed||retry) && current?.id!==id)void play(id);
   }
   async function stinger(id) {
@@ -123,7 +124,7 @@
   function toggle() {
     muted=!muted;try{localStorage.setItem('rdfz-music-muted',muted?'1':'0');}catch{}
     if(ctx)ramp(master.gain,muted?0:.72,.18);
-    if(muted){generation++;controller?.abort();controller=null;cancelFx();}else {void unlock();sync(true);}
+    if(muted){sfx?.stop();generation++;controller?.abort();controller=null;cancelFx();}else {void unlock().then(()=>sfx?.warm());sync(true);}
     buttons();
   }
   const toggleButton=document.createElement('button');toggleButton.id='musicToggle';toggleButton.type='button';
@@ -153,6 +154,6 @@
   finishParkour=function(success,...args){const result=parkourBase.call(this,success,...args);void stinger(success?'victory':'defeat');return result;};
   window.RDFZMusic=Object.freeze({
     resolveScene, refresh:()=>sync(true),
-    diagnostics:()=>({desired,current:current?.id||null,started:current?.started||null,muted,unlocked,context:ctx?.state||'locked',live:live.size,bgmCache:[...bgmCache.keys()],fxCache:[...fxCache.keys()],...JSON.parse(JSON.stringify(stats))})
+    diagnostics:()=>({sfx:sfx?.diagnostics(),desired,current:current?.id||null,started:current?.started||null,muted,unlocked,context:ctx?.state||'locked',live:live.size,bgmCache:[...bgmCache.keys()],fxCache:[...fxCache.keys()],...JSON.parse(JSON.stringify(stats))})
   });
 })();

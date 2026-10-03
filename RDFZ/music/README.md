@@ -64,3 +64,25 @@ python RDFZ/tools/music/test_result_events.py
 - 工作目录的 `stems/`、`masters/`、`previews/`、`soundfonts/`：大型产物，不进入Git或网页部署。
 
 **未进行主观听觉验证。** 技术检查与谱面分析不能保证审美、耐听度或专业混音通过试听。GeneralUser木管/弦乐不具备本项目未验证的真实连奏奏法。Salamander的免费SF2转换版省略了部分原SFZ控制、踏板和释放噪声。没有使用外部评审API补足这些限制。
+
+## 战斗与关键操作音效
+
+本地制作和测试使用 Conda 环境 `rdfz2024`（Python 3.12、FluidSynth、`tools/music/requirements.txt` 及 Playwright）。不修改系统 Python 或全局环境变量。
+
+音效沿用配乐的 GeneralUser GS 固定版本采样库、MIDI 编写、FluidSynth 离线渲染和 FFmpeg Ogg/MP3 编码；不在浏览器合成声音。`sfx/gestures.json` 是八种短音效的可编辑源，旁边的 MIDI 为导出谱面。工作文件和音源保存在仓库根目录已忽略的 `music-work/`，网页只发布 `assets/sfx/` 的哈希音频文件。
+
+```bash
+conda activate rdfz2024
+# 音源须为 production.json 中指定 SHA256 的 GeneralUser GS：
+# music-work/soundfonts/GeneralUser-GS.sf2
+python RDFZ/tools/music/build_sfx.py
+node RDFZ/tools/build_web.mjs
+# 启动网页服务后，以隔离浏览器档案验证：
+python RDFZ/tools/music/test_sfx.py
+```
+
+音效触发范围：普通／穿盾命中、属性命中、护盾吸收、护盾生成、闪避／免疫、成功释放技能，以及确认出战、暂停／继续。技能不足星数不响；普通导航、图鉴卡片、剧情翻页、悬停不加声。键盘技能和暂停使用同一触发路径。
+
+沿用现有声音开关及静音存储，与 BGM 共用 AudioContext 和主音量。首次用户手势后预备八个短音效，命中类至少间隔 105ms、其他类别 180ms，最多四声并发。音效不压低或重启背景音乐；静音、暂停、离开战斗或切换到后台会清理短音效，超过 220ms 的迟到反馈丢弃；音频请求失败只跳过声音，不阻塞伤害或存档。
+
+`reports/sfx-production.json` 记录双编码解码与峰值检查；`reports/sfx-browser-validation.json` 记录浏览器回归。短音效不循环，允许编码器小于 30ms 的尾部填充差异。尚未进行主观听觉验收。
